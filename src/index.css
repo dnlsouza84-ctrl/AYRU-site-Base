@@ -1,0 +1,321 @@
+/* AYRU — Experiência Imersiva */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: #080604;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  cursor: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ─── App ─────────────────────────────── */
+.app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.app.visible {
+  opacity: 1;
+}
+
+/* ─── Pages ───────────────────────────── */
+.page {
+  position: fixed;
+  inset: 0;
+  transition: opacity 0.9s ease;
+  will-change: opacity;
+}
+
+.page.shown {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.page.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── Home ────────────────────────────── */
+.home-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: sepia(15%) brightness(0.65) contrast(1.05);
+  transition: filter 1s ease;
+}
+
+.home-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 15%, rgba(8,6,4,0.72) 100%);
+}
+
+.home-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(260px, 46vw);
+  pointer-events: none;
+  animation: logoBreath 7s ease-in-out infinite;
+}
+
+@keyframes logoBreath {
+  0%, 100% { filter: drop-shadow(0 0 18px rgba(210,170,80,0.30)); }
+  50%       { filter: drop-shadow(0 0 42px rgba(210,170,80,0.65)); }
+}
+
+/* ─── Menu button ─────────────────────── */
+.menu-btn {
+  position: fixed;
+  top: 38px;
+  right: 52px;
+  background: none;
+  border: none;
+  cursor: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 8px;
+  z-index: 150;
+}
+
+.menu-btn span {
+  display: block;
+  width: 26px;
+  height: 1px;
+  background: rgba(255, 242, 200, 0.75);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.menu-btn:hover span:nth-child(1) { transform: translateY(2px); }
+.menu-btn:hover span:nth-child(3) { transform: translateY(-2px); }
+
+/* ─── Music page ──────────────────────── */
+.music-page {
+  background: #080604;
+}
+
+.music-layout {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  animation: fadeIn 0.7s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.back-btn {
+  position: fixed;
+  top: 38px;
+  left: 52px;
+  background: none;
+  border: none;
+  color: rgba(255, 242, 200, 0.65);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: lowercase;
+  cursor: none;
+  transition: color 0.3s ease;
+  z-index: 150;
+}
+
+.back-btn:hover {
+  color: rgba(255, 242, 200, 1);
+}
+
+.cta-btn {
+  position: absolute;
+  bottom: 14%;
+  left: 7%;
+  background: transparent;
+  border: 1px solid rgba(255, 242, 200, 0.55);
+  color: rgba(255, 242, 200, 0.88);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: lowercase;
+  text-decoration: none;
+  padding: 9px 22px;
+  cursor: none;
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+  z-index: 10;
+}
+
+.cta-btn:hover {
+  background: rgba(255, 242, 200, 0.08);
+  border-color: rgba(255, 242, 200, 0.9);
+  color: #fff;
+}
+
+/* ─── Menu overlay ────────────────────── */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 6, 4, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.menu-overlay.menu-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.menu-close {
+  position: absolute;
+  top: 38px;
+  right: 52px;
+  background: none;
+  border: none;
+  color: rgba(255, 242, 200, 0.5);
+  font-size: 20px;
+  font-weight: 300;
+  cursor: none;
+  transition: color 0.3s ease;
+  line-height: 1;
+}
+
+.menu-close:hover {
+  color: rgba(255, 242, 200, 1);
+}
+
+.menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: right;
+}
+
+.menu-item {
+  background: none;
+  border: none;
+  color: rgba(255, 242, 200, 0.78);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(26px, 3.8vw, 50px);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  cursor: none;
+  transition: color 0.3s ease, transform 0.3s ease;
+  text-align: right;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.menu-overlay.menu-open .menu-item {
+  animation: menuSlideIn 0.5s ease both;
+}
+
+.menu-item:nth-child(1) { animation-delay: 0.04s; }
+.menu-item:nth-child(2) { animation-delay: 0.09s; }
+.menu-item:nth-child(3) { animation-delay: 0.14s; }
+.menu-item:nth-child(4) { animation-delay: 0.19s; }
+.menu-item:nth-child(5) { animation-delay: 0.24s; }
+.menu-item:nth-child(6) { animation-delay: 0.29s; }
+.menu-item:nth-child(7) { animation-delay: 0.34s; }
+.menu-item:nth-child(8) { animation-delay: 0.39s; }
+
+@keyframes menuSlideIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.menu-item:not(.menu-item--soon):hover {
+  color: #fff;
+  transform: translateX(-10px);
+}
+
+.menu-item--soon {
+  opacity: 0.28;
+}
+
+.soon-tag {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: lowercase;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* ─── Cursor ──────────────────────────── */
+.cursor-dot {
+  position: fixed;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(230, 195, 100, 0.95);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+.cursor-aura {
+  position: fixed;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(215, 175, 75, 0.22) 0%, transparent 70%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 9998;
+  transition: left 0.14s ease-out, top 0.14s ease-out;
+}
+
+/* ─── Particles ───────────────────────── */
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(215, 175, 75, 0.45);
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0%   { transform: translate(0, 0);          opacity: 0;   }
+  8%   { opacity: 0.8; }
+  45%  { transform: translate(18px, -40vh);   }
+  55%  { transform: translate(-12px, -50vh);  }
+  92%  { opacity: 0.3; }
+  100% { transform: translate(22px, -95vh);   opacity: 0;   }
+}

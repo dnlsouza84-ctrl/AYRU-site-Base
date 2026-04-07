@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AYRU</title>
+  <link rel="icon" href="./assets/AYRU_Logo.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet" />
+  <style>
+    /* ══════════════════════════════════════
+       AYRU — Experiência Imersiva
+    ══════════════════════════════════════ */
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #080604;
+      font-family: 'Bebas Neue', sans-serif;
+      cursor: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ── App wrapper ── */
+    #app {
+      width: 100vw; height: 100vh;
+      position: relative;
+      opacity: 0;
+      transition: opacity 1.4s ease;
+    }
+    #app.visible { opacity: 1; }
+
+    /* ── Pages ── */
+    .page {
+      position: fixed; inset: 0;
+      transition: opacity 0.9s ease;
+      will-change: opacity;
+    }
+    .page.shown  { opacity: 1; pointer-events: all; }
+    .page.hidden { opacity: 0; pointer-events: none; }
+
+    /* ── Home ── */
+    #home-bg {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      background-image: url('./assets/home-mapa.jpg');
+      filter: sepia(15%) brightness(0.62) contrast(1.05);
+    }
+    #home-overlay {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, transparent 15%, rgba(8,6,4,0.72) 100%);
+    }
+    #home-logo {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(260px, 46vw);
+      pointer-events: none;
+      animation: logoBreath 7s ease-in-out infinite;
+    }
+    @keyframes logoBreath {
+      0%, 100% { filter: drop-shadow(0 0 18px rgba(210,170,80,.30)); }
+      50%       { filter: drop-shadow(0 0 44px rgba(210,170,80,.68)); }
+    }
+
+    /* ── Copyright ── */
+    #home-footer {
+      position: absolute; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 11px; letter-spacing: .35em;
+      color: rgba(255,242,200,.32);
+      white-space: nowrap;
+    }
+
+    /* ── Audio toggle ── */
+    #audio-btn {
+      position: fixed; bottom: 32px; left: 52px;
+      background: none; border: none; cursor: none;
+      display: flex; align-items: center; gap: 9px;
+      z-index: 150;
+      transition: opacity .3s ease;
+    }
+    #audio-btn:hover { opacity: 1 !important; }
+
+    #audio-pulse {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(215,175,75,.85);
+      flex-shrink: 0;
+      animation: audioPulse 2.2s ease-in-out infinite;
+      transition: background .3s ease;
+    }
+    #audio-btn.muted #audio-pulse {
+      background: rgba(255,242,200,.28);
+      animation: none;
+    }
+    @keyframes audioPulse {
+      0%, 100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(215,175,75,.5); }
+      50%       { transform: scale(1.3); box-shadow: 0 0 0 5px rgba(215,175,75,0); }
+    }
+    #audio-label {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 11px; letter-spacing: .3em;
+      color: rgba(255,242,200,.55);
+      transition: color .3s ease;
+      line-height: 1;
+    }
+    #audio-btn.muted #audio-label { color: rgba(255,242,200,.28); }
+
+    /* ── Menu button ── */
+    #menu-btn {
+      position: fixed; top: 38px; right: 48px;
+      background: none; border: none; cursor: none;
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 8px; z-index: 150;
+    }
+    #menu-btn span {
+      display: block; width: 22px; height: 1px;
+      background: rgba(255,242,200,.65);
+      transition: transform .35s ease;
+    }
+    #menu-btn:hover span { background: rgba(255,242,200,.95); }
+    #menu-btn:hover span:nth-child(1) { transform: translateY(2px); }
+    #menu-btn:hover span:nth-child(3) { transform: translateY(-2px); }
+
+    /* ── Back button — bottom right, sem fundo ── */
+    #back-btn {
+      position: fixed; bottom: 36px; right: 52px;
+      background: none; border: none; cursor: none;
+      color: rgba(255,242,200,.72);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 12px; letter-spacing: .28em;
+      display: none; align-items: center; gap: 8px;
+      transition: color .3s ease;
+      z-index: 150;
+    }
+    #back-btn:hover { color: rgba(255,242,200,1); }
+    #back-btn.visible { display: flex; }
+    #back-btn svg {
+      width: 13px; height: 13px;
+      stroke: currentColor; fill: none;
+      stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ── Music page ── */
+    #music-page { background: #080604; }
+    #music-layout {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+    }
+    #music-layout.fade-in { animation: fadeIn .75s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ── CTA (área clicável transparente) ── */
+    #cta-btn {
+      position: absolute; bottom: 22%; left: 4%;
+      width: 24%; height: 9%;
+      background: transparent; border: none;
+      text-decoration: none; cursor: none;
+      z-index: 10; display: none;
+      transition: background .3s ease;
+    }
+    #cta-btn:hover { background: rgba(255,255,255,.05); }
+
+    /* ── O que somos page ── */
+    #manifesto-page { background: #080604; }
+
+    #manifesto-bg {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      background-image: url('./assets/home-mapa.jpg');
+      filter: sepia(25%) brightness(0.22) contrast(1.1);
+    }
+    #manifesto-overlay {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 55%, rgba(30,20,8,.3) 0%, rgba(8,6,4,.75) 100%);
+    }
+    #manifesto-scroll {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-start;
+      padding: 11vh 12% 12vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #manifesto-scroll::-webkit-scrollbar { display: none; }
+
+    #manifesto-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(26px, 3.8vw, 50px);
+      letter-spacing: .32em;
+      color: rgba(255,242,200,.62);
+      margin-bottom: 56px;
+      text-align: center;
+      animation: fadeIn 1s ease both;
+    }
+
+    #manifesto-body {
+      max-width: 580px;
+      text-align: center;
+      animation: fadeIn 1.5s ease both;
+    }
+    #manifesto-body p {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(17px, 1.85vw, 23px);
+      line-height: 1.9;
+      color: rgba(255,242,200,.78);
+      margin-bottom: 36px;
+    }
+    #manifesto-body p:last-child { margin-bottom: 0; }
+
+    /* ── Menu overlay — glass sobre a home ── */
+    #menu-overlay {
+      position: fixed; inset: 0;
+      background: rgba(6,4,2,.52);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: flex-end;
+      padding-right: 9%;
+      opacity: 0; pointer-events: none;
+      transition: opacity .5s ease;
+    }
+    #menu-overlay.open { opacity: 1; pointer-events: all; }
+
+    #menu-close {
+      position: absolute; top: 36px; right: 48px;
+      background: none; border: none; cursor: none;
+      color: rgba(255,242,200,.45);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px; letter-spacing: .1em;
+      transition: color .3s ease;
+    }
+    #menu-close:hover { color: rgba(255,242,200,.9); }
+
+    #menu-nav {
+      display: flex; flex-direction: column; gap: 14px;
+      text-align: right;
+    }
+    .menu-item {
+      background: none; border: none; cursor: none;
+      color: rgba(255,242,200,.7);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(22px, 3vw, 42px);
+      letter-spacing: .12em;
+      text-align: right;
+      display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+      transition: color .3s ease, transform .3s ease, letter-spacing .3s ease;
+      opacity: 0; transform: translateX(24px);
+    }
+    #menu-overlay.open .menu-item { animation: menuSlideIn .5s ease both; }
+    #menu-overlay.open .menu-item:nth-child(1) { animation-delay: .04s; }
+    #menu-overlay.open .menu-item:nth-child(2) { animation-delay: .09s; }
+    #menu-overlay.open .menu-item:nth-child(3) { animation-delay: .14s; }
+    #menu-overlay.open .menu-item:nth-child(4) { animation-delay: .19s; }
+    #menu-overlay.open .menu-item:nth-child(5) { animation-delay: .24s; }
+    #menu-overlay.open .menu-item:nth-child(6) { animation-delay: .29s; }
+    #menu-overlay.open .menu-item:nth-child(7) { animation-delay: .34s; }
+    #menu-overlay.open .menu-item:nth-child(8) { animation-delay: .39s; }
+
+    @keyframes menuSlideIn {
+      from { opacity: 0; transform: translateX(24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .menu-item:not(.soon):hover {
+      color: #fff;
+      transform: translateX(-8px);
+      letter-spacing: .16em;
+    }
+    .menu-item.soon { opacity: .22; }
+    .soon-tag {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 9px; letter-spacing: .22em;
+      font-style: italic; opacity: .7;
+      text-transform: lowercase;
+    }
+
+    /* ── Cursor ── */
+    #cursor-dot {
+      position: fixed; width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(230,195,100,.95);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+    }
+    #cursor-aura {
+      position: fixed; width: 58px; height: 58px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(215,175,75,.22) 0%, transparent 70%);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9998;
+      transition: left .13s ease-out, top .13s ease-out;
+    }
+
+    /* ── Particles ── */
+    #particles {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 2;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute; border-radius: 50%;
+      background: rgba(215,175,75,.72);
+      box-shadow: 0 0 4px rgba(215,175,75,.5);
+      animation: particleFloat linear infinite;
+    }
+    @keyframes particleFloat {
+      0%   { transform: translate(0,0);         opacity: 0; }
+      8%   { opacity: 1; }
+      45%  { transform: translate(18px,-40vh); }
+      55%  { transform: translate(-12px,-50vh); }
+      90%  { opacity: .5; }
+      100% { transform: translate(22px,-95vh);  opacity: 0; }
+    }
+
+    /* ── Popup ── */
+    #popup-overlay {
+      position: fixed; inset: 0;
+      background: rgba(8,6,4,.84);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .55s ease;
+    }
+    #popup-overlay.open { opacity: 1; pointer-events: all; }
+
+    #popup-box {
+      position: relative;
+      max-width: 420px;
+      width: 88%;
+      animation: fadeIn .45s ease;
+    }
+
+    #popup-link { display: block; text-decoration: none; }
+
+    #popup-img {
+      width: 100%; display: block;
+      border-radius: 2px;
+      box-shadow: 0 8px 48px rgba(0,0,0,.7);
+    }
+
+    #popup-close {
+      position: absolute; top: -15px; right: -15px;
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(8,6,4,.92);
+      border: 1px solid rgba(255,242,200,.3);
+      color: rgba(255,242,200,.75);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 14px; line-height: 1;
+      cursor: none;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .3s ease, color .3s ease;
+      z-index: 10;
+    }
+    #popup-close:hover { border-color: rgba(255,242,200,.8); color: #fff; }
+
+    @media (max-width: 768px) {
+      #popup-close { cursor: pointer; width: 38px; height: 38px; top: -12px; right: -12px; }
+    }
+
+    /* ── Music BG (cinematic blur — mobile only) ── */
+    #music-bg {
+      display: none;
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: blur(28px) brightness(0.28);
+      transform: scale(1.08);
+      z-index: 0;
+    }
+
+    /* ════════════════════════════════════════
+       RESPONSIVIDADE MOBILE
+    ════════════════════════════════════════ */
+
+    /* Cursor: desabilita em touch */
+    @media (hover: none) and (pointer: coarse) {
+      body { cursor: auto; }
+      #cursor-dot, #cursor-aura { display: none; }
+      button, a { cursor: pointer; }
+      .menu-item:not(.soon):hover { transform: none; letter-spacing: .12em; color: rgba(255,242,200,.7); }
+    }
+
+    @media (max-width: 768px) {
+      /* ── Home ── */
+      #home-logo { width: min(200px, 62vw); }
+      #home-footer { font-size: 9px; letter-spacing: .2em; bottom: 18px; }
+
+      /* ── Botões fixos — alvos de toque maiores ── */
+      #menu-btn  { top: 20px; right: 20px; padding: 10px; }
+      #audio-btn { bottom: 20px; left: 20px; }
+      #back-btn  { bottom: 20px; right: 20px; font-size: 11px; gap: 6px; min-height: 44px; }
+
+      /* ── Music page — imagem completa com fundo cinemático ── */
+      #music-bg { display: block; }
+      #music-layout {
+        object-fit: contain;
+        object-position: center;
+        background: transparent;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* ── CTA — posição calculada via JS ── */
+      #cta-btn { position: absolute; z-index: 5; }
+
+      /* ── Menu ── */
+      #menu-overlay { padding-right: 5%; }
+      #menu-nav  { gap: 10px; }
+      #menu-close { top: 20px; right: 20px; min-width: 44px; min-height: 44px;
+                    display: flex; align-items: center; justify-content: center; }
+      .menu-item { font-size: clamp(20px, 6.5vw, 34px); }
+
+      /* ── O que somos ── */
+      #manifesto-scroll {
+        padding: 8vh 6% 12vh;
+        -webkit-overflow-scrolling: touch;
+      }
+      #manifesto-title  { font-size: clamp(20px, 6vw, 30px); margin-bottom: 32px; }
+      #manifesto-body p { font-size: clamp(15px, 4.2vw, 19px); line-height: 1.75; margin-bottom: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <!-- Áudio ambiente -->
+    <audio id="ambient" src="./audio/home-ambient.mp3" loop></audio>
+
+    <!-- Cursor personalizado -->
+    <div id="cursor-aura"></div>
+    <div id="cursor-dot"></div>
+
+    <!-- Partículas -->
+    <div id="particles"></div>
+
+    <!-- Botão de menu (sempre visível) -->
+    <button id="menu-btn" aria-label="Abrir menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Botão voltar (compartilhado, canto inferior direito) -->
+    <button id="back-btn" aria-label="Voltar">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      VOLTAR
+    </button>
+
+    <!-- ── Home ── -->
+    <div id="home-page" class="page shown">
+      <div id="home-bg"></div>
+      <div id="home-overlay"></div>
+      <img id="home-logo" src="./assets/AYRU_Logo.png" alt="AYRU" />
+      <p id="home-footer">AYRU &copy; DIREITOS RESERVADOS</p>
+    </div>
+
+    <!-- Botão de som -->
+    <button id="audio-btn" aria-label="Toggle som" style="opacity:.65">
+      <div id="audio-pulse"></div>
+      <span id="audio-label">SOM</span>
+    </button>
+
+    <!-- ── Página de música ── -->
+    <div id="music-page" class="page hidden">
+      <div id="music-bg"></div>
+      <img id="music-layout" src="" alt="" />
+      <a id="cta-btn" href="#" target="_blank" rel="noopener noreferrer" aria-label="Ouça agora no Spotify"></a>
+    </div>
+
+    <!-- ── O que somos ── -->
+    <div id="manifesto-page" class="page hidden">
+      <div id="manifesto-bg"></div>
+      <div id="manifesto-overlay"></div>
+      <div id="manifesto-scroll">
+        <h2 id="manifesto-title">O QUE SOMOS</h2>
+        <div id="manifesto-body">
+          <p>AYRU não começa na música.<br>Começa no sentir.</p>
+          <p>Existe um movimento que atravessa tudo —<br>
+             terra, água, fogo e ar.<br>
+             Presença invisível, mas constante.<br>
+             Nem sempre percebida.<br>
+             Sempre presente.</p>
+          <p>AYRU nasce desse reencontro.<br>
+             Como caminho aberto, não como resposta.<br>
+             Cada som abre passagem.<br>
+             Cada elemento revela.<br>
+             Cada faixa marca um ponto da jornada.</p>
+          <p>Aqui, a escuta é interna.<br>
+             O movimento é sutil.<br>
+             A transformação acontece sem anúncio.<br>
+             Nada precisa ser forçado.<br>
+             O que é essencial encontra espaço.<br>
+             O universo segue em fluxo.<br>
+             E algo em você reconhece isso.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Popup home ── -->
+    <div id="popup-overlay">
+      <div id="popup-box">
+        <button id="popup-close" aria-label="Fechar">✕</button>
+        <a id="popup-link" href="https://ditto.fm/mare_viva" target="_blank" rel="noopener noreferrer">
+          <img id="popup-img" src="./assets/pop_up.png" alt="Maré Viva — ouça agora" />
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Menu overlay ── -->
+    <div id="menu-overlay">
+      <button id="menu-close" aria-label="Fechar menu">✕</button>
+      <nav id="menu-nav"></nav>
+    </div>
+
+  </div>
+
+  <script>
+    // ══════════════════════════════════════
+    //  AYRU — Lógica da experiência
+    // ══════════════════════════════════════
+
+    const TRACKS = [
+      { id: 'o-que-somos', label: 'O Que Somos',    type: 'text',  layout: null,                            spotify: null },
+      { id: 'desperta',    label: '01  Desperta',    type: 'music', layout: './assets/desperta-layout.jpg',  spotify: 'https://ditto.fm/desperta-kae-souza' },
+      { id: 'raiz',        label: '02  Raiz',         type: 'music', layout: './assets/raiz-layout.jpg',      spotify: 'https://ditto.fm/raiz_b2151e38' },
+      { id: 'mare-viva',   label: '03  Maré Viva',   type: 'music', layout: './assets/mare-viva-layout.jpg', spotify: 'https://ditto.fm/mare_viva' },
+      { id: 'acende',      label: '04  Acende',       type: 'music', layout: './assets/acende-layout.jpg',    spotify: '#' },
+      { id: 'sopro',       label: '05  Sopro',        type: 'music', layout: './assets/sopro-layout.jpg',     spotify: '#' },
+      { id: 'elementar',   label: '06  Elementar',    type: 'music', layout: null,                            spotify: null },
+      { id: 'guia',        label: '07  Guia',         type: 'music', layout: null,                            spotify: null },
+    ]
+
+    // ── Refs ──────────────────────────────
+    const app            = document.getElementById('app')
+    const audio          = document.getElementById('ambient')
+    const homePage       = document.getElementById('home-page')
+    const musicPage      = document.getElementById('music-page')
+    const manifestoPage  = document.getElementById('manifesto-page')
+    const musicLayout    = document.getElementById('music-layout')
+    const ctaBtn         = document.getElementById('cta-btn')
+    const backBtn        = document.getElementById('back-btn')
+    const menuOverlay    = document.getElementById('menu-overlay')
+    const menuNav        = document.getElementById('menu-nav')
+    const cursorDot      = document.getElementById('cursor-dot')
+    const cursorAura     = document.getElementById('cursor-aura')
+    const audioBtn       = document.getElementById('audio-btn')
+    const audioLabel     = document.getElementById('audio-label')
+    const musicBg        = document.getElementById('music-bg')
+
+    // ── Particles ─────────────────────────
+    const particlesEl = document.getElementById('particles')
+    for (let i = 0; i < 55; i++) {
+      const p = document.createElement('div')
+      p.className = 'particle'
+      p.style.left              = Math.random() * 100 + '%'
+      p.style.top               = Math.random() * 100 + '%'
+      p.style.width             = (Math.random() * 3.5 + 1.5) + 'px'
+      p.style.height            = p.style.width
+      p.style.animationDuration = (Math.random() * 20 + 12) + 's'
+      p.style.animationDelay    = -(Math.random() * 22) + 's'
+      particlesEl.appendChild(p)
+    }
+
+    // ── Cursor ────────────────────────────
+    window.addEventListener('mousemove', (e) => {
+      cursorDot.style.left  = e.clientX + 'px'
+      cursorDot.style.top   = e.clientY + 'px'
+      cursorAura.style.left = e.clientX + 'px'
+      cursorAura.style.top  = e.clientY + 'px'
+    })
+
+    // ── Áudio ─────────────────────────────
+    audio.volume = 0.32
+    let audioStarted = false
+    let audioMuted   = false
+
+    function startAudio() {
+      if (audioStarted) return
+      audioStarted = true
+      audio.play().catch(() => {})
+    }
+
+    audio.play().catch(() => {
+      window.addEventListener('pointerdown', startAudio, { once: true })
+    })
+
+    audioBtn.addEventListener('click', () => {
+      if (!audioStarted) startAudio()
+      audioMuted = !audioMuted
+      audio.muted = audioMuted
+      audioBtn.classList.toggle('muted', audioMuted)
+      audioLabel.textContent = audioMuted ? 'MUDO' : 'SOM'
+    })
+
+    // ── Fade-in da app ────────────────────
+    requestAnimationFrame(() => {
+      setTimeout(() => app.classList.add('visible'), 80)
+    })
+
+    // ── Menu build ────────────────────────
+    TRACKS.forEach((track) => {
+      const active = track.type === 'text' || track.layout !== null
+      const btn = document.createElement('button')
+      btn.className = 'menu-item' + (active ? '' : ' soon')
+      btn.disabled  = !active
+
+      if (!active) {
+        const tag = document.createElement('span')
+        tag.className   = 'soon-tag'
+        tag.textContent = 'em breve'
+        btn.appendChild(tag)
+      }
+
+      btn.appendChild(document.createTextNode(track.label))
+
+      btn.addEventListener('click', () => {
+        if (!active) return
+        closeMenu()
+        if (track.type === 'text') {
+          setTimeout(() => openManifesto(), 480)
+        } else {
+          setTimeout(() => openTrack(track), 480)
+        }
+      })
+
+      menuNav.appendChild(btn)
+    })
+
+    // ── Navegação ─────────────────────────
+    function showBack() { backBtn.classList.add('visible') }
+    function hideBack() { backBtn.classList.remove('visible') }
+
+    // ── CTA: posicionamento preciso mobile ──
+    function updateCtaPosition() {
+      const isMobile = window.innerWidth < 768
+      if (!isMobile) {
+        // Desktop: reset para CSS default
+        ctaBtn.style.left = ''; ctaBtn.style.top  = ''
+        ctaBtn.style.width = ''; ctaBtn.style.height = ''
+        ctaBtn.style.bottom = ''; ctaBtn.style.position = ''
+        return
+      }
+      if (!musicLayout.naturalWidth || !musicLayout.naturalHeight) return
+
+      const cW = musicPage.clientWidth
+      const cH = musicPage.clientHeight
+      const iA = musicLayout.naturalWidth / musicLayout.naturalHeight
+      const cA = cW / cH
+
+      let rW, rH, oX, oY
+      if (iA > cA) {
+        // landscape img em portrait screen → barras cima/baixo
+        rW = cW; rH = cW / iA; oX = 0; oY = (cH - rH) / 2
+      } else {
+        // portrait img → barras laterais
+        rH = cH; rW = cH * iA; oX = (cW - rW) / 2; oY = 0
+      }
+
+      // "OUÇA AGORA" ≈ left 5–28% / top 74–86% da imagem
+      ctaBtn.style.position = 'absolute'
+      ctaBtn.style.left     = (oX + rW * 0.05) + 'px'
+      ctaBtn.style.top      = (oY + rH * 0.74)  + 'px'
+      ctaBtn.style.width    = (rW * 0.26) + 'px'
+      ctaBtn.style.height   = (rH * 0.13) + 'px'
+      ctaBtn.style.bottom   = 'auto'
+    }
+
+    musicLayout.addEventListener('load', updateCtaPosition)
+    window.addEventListener('resize', updateCtaPosition)
+
+    function openTrack(track) {
+      startAudio()
+
+      musicLayout.classList.remove('fade-in')
+      void musicLayout.offsetWidth
+      musicLayout.src = track.layout
+      musicLayout.alt = track.label
+      musicLayout.classList.add('fade-in')
+
+      // Mobile: fundo cinemático (blur) com a mesma imagem
+      if (window.innerWidth < 768) {
+        musicBg.style.backgroundImage = `url('${track.layout}')`
+      }
+
+      ctaBtn.href          = track.spotify || '#'
+      ctaBtn.style.display = track.spotify && track.spotify !== '#' ? 'block' : 'none'
+
+      homePage.classList.replace('shown', 'hidden')
+      manifestoPage.classList.replace('shown', 'hidden')
+      musicPage.classList.replace('hidden', 'shown')
+      showBack()
+    }
+
+    function openManifesto() {
+      startAudio()
+      homePage.classList.replace('shown', 'hidden')
+      musicPage.classList.replace('shown', 'hidden')
+      manifestoPage.classList.replace('hidden', 'shown')
+      showBack()
+    }
+
+    function goHome() {
+      musicPage.classList.replace('shown', 'hidden')
+      manifestoPage.classList.replace('shown', 'hidden')
+      homePage.classList.replace('hidden', 'shown')
+      hideBack()
+    }
+
+    function openMenu() {
+      startAudio()
+      menuOverlay.classList.add('open')
+    }
+
+    function closeMenu() {
+      menuOverlay.classList.remove('open')
+    }
+
+    // ── Popup ─────────────────────────────
+    const popupOverlay = document.getElementById('popup-overlay')
+
+    function closePopup() { popupOverlay.classList.remove('open') }
+
+    // Abre após o fade-in da app (1.4s) + 1s de delay
+    setTimeout(() => popupOverlay.classList.add('open'), 2400)
+
+    document.getElementById('popup-close').addEventListener('click', closePopup)
+    popupOverlay.addEventListener('click', (e) => {
+      if (e.target === popupOverlay) closePopup()
+    })
+
+    // ── Eventos ───────────────────────────
+    document.getElementById('menu-btn').addEventListener('click', openMenu)
+    document.getElementById('menu-close').addEventListener('click', closeMenu)
+    backBtn.addEventListener('click', goHome)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu()
+    })
+  </script>
+</body>
+</html>
