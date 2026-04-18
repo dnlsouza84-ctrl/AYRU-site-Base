@@ -2,7 +2,11 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#080604" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>AYRU</title>
   <link rel="icon" href="./assets/AYRU_Logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,17 +20,24 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
-      width: 100%; height: 100%; overflow: hidden;
+      width: 100%; height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
       background: #080604;
       font-family: 'Bebas Neue', sans-serif;
       cursor: none;
       user-select: none;
       -webkit-user-select: none;
+      -webkit-text-size-adjust: 100%;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* ── App wrapper ── */
     #app {
       width: 100vw; height: 100vh;
+      height: 100dvh;
       position: relative;
       opacity: 0;
       transition: opacity 1.4s ease;
@@ -368,10 +379,6 @@
     }
     #popup-close:hover { border-color: rgba(255,242,200,.8); color: #fff; }
 
-    @media (max-width: 768px) {
-      #popup-close { cursor: pointer; width: 38px; height: 38px; top: -12px; right: -12px; }
-    }
-
     /* ── Music BG (cinematic blur — mobile only) ── */
     #music-bg {
       display: none;
@@ -398,12 +405,29 @@
     @media (max-width: 768px) {
       /* ── Home ── */
       #home-logo { width: min(200px, 62vw); }
-      #home-footer { font-size: 9px; letter-spacing: .2em; bottom: 18px; }
+      #home-footer {
+        font-size: 9px; letter-spacing: .2em;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      }
 
-      /* ── Botões fixos — alvos de toque maiores ── */
-      #menu-btn  { top: 20px; right: 20px; padding: 10px; }
-      #audio-btn { bottom: 20px; left: 20px; }
-      #back-btn  { bottom: 20px; right: 20px; font-size: 11px; gap: 6px; min-height: 44px; }
+      /* ── Botões fixos — alvos de toque maiores (mín. 44px) ── */
+      #menu-btn {
+        top: calc(14px + env(safe-area-inset-top, 0px));
+        right: calc(14px + env(safe-area-inset-right, 0px));
+        padding: 12px; min-width: 44px; min-height: 44px;
+        align-items: center; justify-content: center;
+      }
+      #audio-btn {
+        bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        left: calc(14px + env(safe-area-inset-left, 0px));
+        padding: 10px 12px; min-height: 44px;
+      }
+      #back-btn {
+        bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        right: calc(14px + env(safe-area-inset-right, 0px));
+        font-size: 11px; gap: 6px;
+        min-height: 44px; padding: 10px 12px;
+      }
 
       /* ── Music page — imagem completa com fundo cinemático ── */
       #music-bg { display: block; }
@@ -419,19 +443,60 @@
       #cta-btn { position: absolute; z-index: 5; }
 
       /* ── Menu ── */
-      #menu-overlay { padding-right: 5%; }
+      #menu-overlay {
+        padding-right: calc(5% + env(safe-area-inset-right, 0px));
+        padding-left: env(safe-area-inset-left, 0px);
+        align-items: center;
+      }
       #menu-nav  { gap: 10px; }
-      #menu-close { top: 20px; right: 20px; min-width: 44px; min-height: 44px;
-                    display: flex; align-items: center; justify-content: center; }
-      .menu-item { font-size: clamp(20px, 6.5vw, 34px); }
+      #menu-close {
+        top: calc(14px + env(safe-area-inset-top, 0px));
+        right: calc(14px + env(safe-area-inset-right, 0px));
+        min-width: 44px; min-height: 44px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .menu-item { font-size: clamp(20px, 6.5vw, 34px); padding: 4px 0; }
 
       /* ── O que somos ── */
       #manifesto-scroll {
-        padding: 8vh 6% 12vh;
+        padding: 10vh 6% calc(12vh + env(safe-area-inset-bottom, 0px));
         -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
       }
       #manifesto-title  { font-size: clamp(20px, 6vw, 30px); margin-bottom: 32px; }
       #manifesto-body p { font-size: clamp(15px, 4.2vw, 19px); line-height: 1.75; margin-bottom: 26px; }
+
+      /* ── Popup ── */
+      #popup-box   { max-width: 360px; width: 86%; }
+      #popup-close { cursor: pointer; width: 40px; height: 40px; top: -10px; right: -10px; font-size: 16px; }
+
+      /* ── Particles — densidade reduzida via opacidade ── */
+      #particles { opacity: .7; }
+    }
+
+    /* ── Telas muito pequenas (≤ 420px) ── */
+    @media (max-width: 420px) {
+      #home-logo       { width: min(180px, 58vw); }
+      #home-footer     { font-size: 8px; letter-spacing: .16em; }
+      .menu-item       { font-size: clamp(19px, 7vw, 28px); letter-spacing: .1em; }
+      #manifesto-title { font-size: clamp(18px, 5.5vw, 26px); letter-spacing: .24em; margin-bottom: 28px; }
+      #manifesto-body p{ font-size: clamp(14px, 4vw, 17px); line-height: 1.7; margin-bottom: 22px; }
+      #audio-label     { font-size: 10px; letter-spacing: .22em; }
+      #back-btn        { font-size: 10px; letter-spacing: .22em; }
+    }
+
+    /* ── Mobile em paisagem (altura curta) ── */
+    @media (max-height: 500px) and (orientation: landscape) {
+      #home-logo        { width: min(140px, 26vh); }
+      #home-footer      { font-size: 8px; bottom: 8px; letter-spacing: .18em; }
+      #menu-overlay     { align-items: center; }
+      #menu-nav         { gap: 6px; }
+      .menu-item        { font-size: clamp(16px, 4.2vh, 24px); padding: 2px 0; }
+      #manifesto-scroll { padding: 6vh 10% 6vh; }
+      #manifesto-title  { font-size: clamp(18px, 5vh, 26px); margin-bottom: 16px; }
+      #manifesto-body p { font-size: clamp(13px, 3vh, 17px); margin-bottom: 14px; line-height: 1.6; }
+      #popup-box        { max-width: 300px; }
+      #popup-img        { max-height: 78vh; width: auto; margin: 0 auto; }
     }
   </style>
 </head>
@@ -565,8 +630,10 @@
     const musicBg        = document.getElementById('music-bg')
 
     // ── Particles ─────────────────────────
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches
+    const particleCount = window.innerWidth < 768 ? 26 : 55
     const particlesEl = document.getElementById('particles')
-    for (let i = 0; i < 55; i++) {
+    for (let i = 0; i < particleCount; i++) {
       const p = document.createElement('div')
       p.className = 'particle'
       p.style.left              = Math.random() * 100 + '%'
@@ -578,13 +645,15 @@
       particlesEl.appendChild(p)
     }
 
-    // ── Cursor ────────────────────────────
-    window.addEventListener('mousemove', (e) => {
-      cursorDot.style.left  = e.clientX + 'px'
-      cursorDot.style.top   = e.clientY + 'px'
-      cursorAura.style.left = e.clientX + 'px'
-      cursorAura.style.top  = e.clientY + 'px'
-    })
+    // ── Cursor (desktop only) ─────────────
+    if (!isTouch) {
+      window.addEventListener('mousemove', (e) => {
+        cursorDot.style.left  = e.clientX + 'px'
+        cursorDot.style.top   = e.clientY + 'px'
+        cursorAura.style.left = e.clientX + 'px'
+        cursorAura.style.top  = e.clientY + 'px'
+      })
+    }
 
     // ── Áudio ─────────────────────────────
     audio.volume = 0.32
@@ -684,6 +753,7 @@
 
     musicLayout.addEventListener('load', updateCtaPosition)
     window.addEventListener('resize', updateCtaPosition)
+    window.addEventListener('orientationchange', () => setTimeout(updateCtaPosition, 120))
 
     function openTrack(track) {
       startAudio()
