@@ -92,7 +92,7 @@
 
     /* ── Social links ── */
     #social-links {
-      position: absolute; bottom: 58px; left: 50%;
+      position: absolute; top: 42px; left: 50%;
       transform: translateX(-50%);
       display: flex; align-items: center; gap: 22px;
       z-index: 5;
@@ -432,7 +432,8 @@
         bottom: calc(16px + env(safe-area-inset-bottom, 0px));
       }
       #social-links {
-        bottom: calc(50px + env(safe-area-inset-bottom, 0px));
+        top: calc(22px + env(safe-area-inset-top, 0px));
+        bottom: auto;
         gap: 26px;
       }
       #social-links a { cursor: pointer; opacity: .52; width: 44px; height: 44px; }
