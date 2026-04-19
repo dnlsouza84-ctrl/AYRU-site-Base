@@ -69,11 +69,27 @@
       background: radial-gradient(ellipse at 50% 50%, transparent 15%, rgba(8,6,4,0.72) 100%);
     }
     #home-logo {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: min(260px, 46vw);
+      position: absolute; top: 38px; left: 48px;
+      width: min(130px, 23vw);
       pointer-events: none;
       animation: logoBreath 7s ease-in-out infinite;
+    }
+
+    /* ── Frase central ── */
+    #home-phrase {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(26px, 3.6vw, 52px);
+      letter-spacing: .12em;
+      color: rgba(255,242,200,.78);
+      text-align: center;
+      white-space: nowrap;
+      pointer-events: none;
+      text-shadow: 0 0 48px rgba(210,170,80,.18);
+      animation: fadeIn 2s ease both;
     }
     @keyframes logoBreath {
       0%, 100% { filter: drop-shadow(0 0 18px rgba(210,170,80,.30)); }
@@ -426,7 +442,8 @@
 
     @media (max-width: 768px) {
       /* ── Home ── */
-      #home-logo { width: min(200px, 62vw); }
+      #home-logo { top: 22px; left: 20px; width: min(90px, 26vw); }
+      #home-phrase { font-size: clamp(20px, 6vw, 32px); white-space: normal; width: 80%; text-align: center; }
       #home-footer {
         font-size: 9px; letter-spacing: .2em;
         bottom: calc(16px + env(safe-area-inset-bottom, 0px));
@@ -562,6 +579,7 @@
       </div>
       <div id="home-overlay"></div>
       <img id="home-logo" src="./assets/AYRU_Logo.png" alt="AYRU" />
+      <p id="home-phrase">A Floresta é Você</p>
 
       <!-- Redes Sociais -->
       <div id="social-links">
