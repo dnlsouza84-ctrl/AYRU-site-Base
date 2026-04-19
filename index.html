@@ -449,12 +449,16 @@
         bottom: calc(16px + env(safe-area-inset-bottom, 0px));
       }
       #social-links {
-        top: calc(22px + env(safe-area-inset-top, 0px));
+        top: 50%;
+        left: auto;
+        right: calc(12px + env(safe-area-inset-right, 0px));
+        transform: translateY(-50%);
+        flex-direction: column;
+        gap: 18px;
         bottom: auto;
-        gap: 26px;
       }
-      #social-links a { cursor: pointer; opacity: .52; width: 44px; height: 44px; }
-      #social-links svg { width: 20px; height: 20px; }
+      #social-links a { cursor: pointer; opacity: .55; width: 44px; height: 44px; }
+      #social-links svg { width: 22px; height: 22px; }
 
       /* ── Botões fixos — alvos de toque maiores (mín. 44px) ── */
       #menu-btn {
@@ -697,7 +701,7 @@
     const musicBg        = document.getElementById('music-bg')
 
     // ── Particles ─────────────────────────
-    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
     const particleCount = window.innerWidth < 768 ? 26 : 55
     const particlesEl = document.getElementById('particles')
     for (let i = 0; i < particleCount; i++) {
@@ -892,24 +896,27 @@
       let sensX = 0.04, sensY = 0.02
 
       function calcPanSensitivity() {
-        if (!homeVideoEl.videoWidth) return
         const vw = window.innerWidth, vh = window.innerHeight
-        const videoAspect  = homeVideoEl.videoWidth / homeVideoEl.videoHeight
+        // usa dimensões reais; fallback 16:9 enquanto vídeo não carrega
+        const videoAspect  = (homeVideoEl.videoWidth && homeVideoEl.videoHeight)
+          ? homeVideoEl.videoWidth / homeVideoEl.videoHeight
+          : 16 / 9
         const screenAspect = vw / vh
         if (videoAspect > screenAspect) {
-          // vídeo mais largo: excesso horizontal
           const excess = vh * videoAspect - vw
-          sensX = excess > 2 ? 100 / excess : 0
+          sensX = excess > 2 ? 100 / excess : 0.05
           sensY = 0
         } else {
-          // vídeo mais alto: excesso vertical
           const excess = vw / videoAspect - vh
-          sensY = excess > 2 ? 100 / excess : 0
+          sensY = excess > 2 ? 100 / excess : 0.05
           sensX = 0
         }
       }
 
+      // calcula imediatamente com fallback e recalcula quando vídeo carregar
+      calcPanSensitivity()
       homeVideoEl.addEventListener('loadedmetadata', calcPanSensitivity)
+      homeVideoEl.addEventListener('canplay',        calcPanSensitivity)
       window.addEventListener('resize', calcPanSensitivity)
       window.addEventListener('orientationchange', () => setTimeout(calcPanSensitivity, 150))
 
