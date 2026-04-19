@@ -178,6 +178,30 @@
     #menu-btn:hover span:nth-child(1) { transform: translateY(2px); }
     #menu-btn:hover span:nth-child(3) { transform: translateY(-2px); }
 
+    /* ── Nav arrows ── */
+    .nav-arrow {
+      position: fixed; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: none;
+      color: rgba(255,242,200,.32);
+      display: none; align-items: center; justify-content: center;
+      padding: 22px 18px;
+      z-index: 20;
+      transition: color .35s ease, transform .35s ease;
+    }
+    .nav-arrow:hover {
+      color: rgba(255,242,200,.88);
+      transform: translateY(-50%) scale(1.18);
+    }
+    .nav-arrow.visible { display: flex; }
+    #nav-prev { left: 12px; }
+    #nav-next { right: 12px; }
+    .nav-arrow svg {
+      width: 14px; height: 28px;
+      stroke: currentColor; fill: none;
+      stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round;
+    }
+
     /* ── Back button — bottom right, sem fundo ── */
     #back-btn {
       position: fixed; bottom: 36px; right: 52px;
@@ -480,6 +504,12 @@
         min-height: 44px; padding: 10px 12px;
       }
 
+      /* ── Nav arrows mobile ── */
+      .nav-arrow { cursor: pointer; padding: 24px 20px; color: rgba(255,242,200,.48); }
+      .nav-arrow svg { width: 16px; height: 30px; }
+      #nav-prev { left: 0; }
+      #nav-next { right: 0; }
+
       /* ── CTA — posição calculada via JS ── */
       #cta-btn { position: absolute; z-index: 5; }
 
@@ -559,6 +589,14 @@
       <span></span><span></span><span></span>
     </button>
 
+    <!-- Setas de navegação entre faixas -->
+    <button id="nav-prev" class="nav-arrow" aria-label="Faixa anterior">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button id="nav-next" class="nav-arrow" aria-label="Próxima faixa">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
     <!-- Botão voltar (compartilhado, canto inferior direito) -->
     <button id="back-btn" aria-label="Voltar">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
@@ -616,7 +654,6 @@
       <div id="manifesto-bg"></div>
       <div id="manifesto-overlay"></div>
       <div id="manifesto-scroll">
-        <h2 id="manifesto-title">O QUE SOMOS</h2>
         <div id="manifesto-body">
           <p>AYRU não começa na música.<br>Começa no sentir.</p>
           <p>Existe um movimento que atravessa tudo —<br>
@@ -665,14 +702,18 @@
 
     const TRACKS = [
       { id: 'o-que-somos', label: 'Origem',        type: 'text',  layout: null,                                              spotify: null },
-      { id: 'desperta',    label: '01  Desperta',  type: 'music', layout: './assets/mobile/desperta-layout-mobile.jpg',  spotify: 'https://ditto.fm/desperta-kae-souza' },
-      { id: 'raiz',        label: '02  Raiz',       type: 'music', layout: './assets/mobile/raiz-layout-mobile.jpg',       spotify: 'https://ditto.fm/raiz_b2151e38' },
-      { id: 'mare-viva',   label: '03  Maré Viva', type: 'music', layout: './assets/mobile/mare-viva-layout-mobile.jpg',  spotify: 'https://ditto.fm/mare_viva' },
-      { id: 'acende',      label: '04  Acende',     type: 'music', layout: './assets/mobile/acende-layout-mobile.jpg',     spotify: '#' },
-      { id: 'sopro',       label: '05  Sopro',      type: 'music', layout: './assets/mobile/sopro-layout-mobile.jpg',      spotify: '#' },
-      { id: 'elementar',   label: '06  Elementar',  type: 'music', layout: './assets/mobile/elementar-layout-mobile.jpg',  spotify: null },
-      { id: 'guia',        label: '07  Guia',        type: 'music', layout: './assets/mobile/guia-layout-mobile.jpg',       spotify: null },
+      { id: 'desperta',    label: 'Desperta',   type: 'music', layout: './assets/mobile/desperta-layout-mobile.jpg',  spotify: 'https://ditto.fm/desperta-kae-souza' },
+      { id: 'raiz',        label: 'Raiz',        type: 'music', layout: './assets/mobile/raiz-layout-mobile.jpg',       spotify: 'https://ditto.fm/raiz_b2151e38' },
+      { id: 'mare-viva',   label: 'Maré Viva',  type: 'music', layout: './assets/mobile/mare-viva-layout-mobile.jpg',  spotify: 'https://ditto.fm/mare_viva' },
+      { id: 'acende',      label: 'Acende',      type: 'music', layout: './assets/mobile/acende-layout-mobile.jpg',     spotify: '#' },
+      { id: 'sopro',       label: 'Sopro',       type: 'music', layout: './assets/mobile/sopro-layout-mobile.jpg',      spotify: '#' },
+      { id: 'elementar',   label: 'Elementar',   type: 'music', layout: './assets/mobile/elementar-layout-mobile.jpg',  spotify: null },
+      { id: 'guia',        label: 'Guia',         type: 'music', layout: './assets/mobile/guia-layout-mobile.jpg',       spotify: null },
     ]
+
+    // ── Tracks musicais navegáveis ────────
+    const musicTracks = TRACKS.filter(t => t.type === 'music' && t.layout !== null)
+    let currentTrackIdx = 0
 
     // ── Refs ──────────────────────────────
     const app            = document.getElementById('app')
@@ -690,6 +731,8 @@
     const audioBtn       = document.getElementById('audio-btn')
     const audioLabel     = document.getElementById('audio-label')
     const musicBg        = document.getElementById('music-bg')
+    const navPrev        = document.getElementById('nav-prev')
+    const navNext        = document.getElementById('nav-next')
 
     // ── Particles ─────────────────────────
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
@@ -794,6 +837,15 @@
     function showBack() { backBtn.classList.add('visible') }
     function hideBack() { backBtn.classList.remove('visible') }
 
+    function showNavArrows() {
+      navPrev.classList.add('visible')
+      navNext.classList.add('visible')
+    }
+    function hideNavArrows() {
+      navPrev.classList.remove('visible')
+      navNext.classList.remove('visible')
+    }
+
     // ── CTA: posicionamento preciso mobile ──
     function updateCtaPosition() {
       const isMobile = window.innerWidth < 768
@@ -836,6 +888,8 @@
     function openTrack(track) {
       startAudio()
 
+      currentTrackIdx = musicTracks.findIndex(t => t.id === track.id)
+
       musicLayout.classList.remove('fade-in')
       void musicLayout.offsetWidth
       musicLayout.src = track.layout
@@ -851,6 +905,7 @@
       manifestoPage.classList.replace('shown', 'hidden')
       musicPage.classList.replace('hidden', 'shown')
       showBack()
+      showNavArrows()
     }
 
     function openManifesto() {
@@ -858,6 +913,7 @@
       homePage.classList.replace('shown', 'hidden')
       musicPage.classList.replace('shown', 'hidden')
       manifestoPage.classList.replace('hidden', 'shown')
+      hideNavArrows()
       showBack()
     }
 
@@ -866,6 +922,7 @@
       manifestoPage.classList.replace('shown', 'hidden')
       homePage.classList.replace('hidden', 'shown')
       hideBack()
+      hideNavArrows()
     }
 
     function openMenu() {
@@ -947,12 +1004,24 @@
       homePage.addEventListener('touchcancel', () => { isPanning = false })
     }
 
+    // ── Setas de navegação ────────────────
+    navPrev.addEventListener('click', () => {
+      const idx = (currentTrackIdx - 1 + musicTracks.length) % musicTracks.length
+      openTrack(musicTracks[idx])
+    })
+    navNext.addEventListener('click', () => {
+      const idx = (currentTrackIdx + 1) % musicTracks.length
+      openTrack(musicTracks[idx])
+    })
+
     // ── Eventos ───────────────────────────
     document.getElementById('menu-btn').addEventListener('click', openMenu)
     document.getElementById('menu-close').addEventListener('click', closeMenu)
     backBtn.addEventListener('click', goHome)
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeMenu()
+      if (e.key === 'ArrowLeft'  && musicPage.classList.contains('shown')) navPrev.click()
+      if (e.key === 'ArrowRight' && musicPage.classList.contains('shown')) navNext.click()
     })
   </script>
 </body>
