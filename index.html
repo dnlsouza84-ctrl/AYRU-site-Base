@@ -673,14 +673,14 @@
     // ══════════════════════════════════════
 
     const TRACKS = [
-      { id: 'o-que-somos', label: 'Origem',          type: 'text',  layout: null,                            spotify: null },
-      { id: 'desperta',    label: '01  Desperta',    type: 'music', layout: './assets/desperta-layout.jpg',  spotify: 'https://ditto.fm/desperta-kae-souza' },
-      { id: 'raiz',        label: '02  Raiz',         type: 'music', layout: './assets/raiz-layout.jpg',      spotify: 'https://ditto.fm/raiz_b2151e38' },
-      { id: 'mare-viva',   label: '03  Maré Viva',   type: 'music', layout: './assets/mare-viva-layout.jpg', spotify: 'https://ditto.fm/mare_viva' },
-      { id: 'acende',      label: '04  Acende',       type: 'music', layout: './assets/acende-layout.jpg',    spotify: '#' },
-      { id: 'sopro',       label: '05  Sopro',        type: 'music', layout: './assets/sopro-layout.jpg',     spotify: '#' },
-      { id: 'elementar',   label: '06  Elementar',    type: 'music', layout: null,                            spotify: null },
-      { id: 'guia',        label: '07  Guia',         type: 'music', layout: null,                            spotify: null },
+      { id: 'o-que-somos', label: 'Origem',        type: 'text',  layout: null,                             layoutMobile: null,                                       spotify: null },
+      { id: 'desperta',    label: '01  Desperta',  type: 'music', layout: './assets/desperta-layout.jpg',   layoutMobile: './assets/mobile/desperta-layout-mobile.png', spotify: 'https://ditto.fm/desperta-kae-souza' },
+      { id: 'raiz',        label: '02  Raiz',       type: 'music', layout: './assets/raiz-layout.jpg',       layoutMobile: './assets/mobile/raiz-layout-mobile.png',     spotify: 'https://ditto.fm/raiz_b2151e38' },
+      { id: 'mare-viva',   label: '03  Maré Viva', type: 'music', layout: './assets/mare-viva-layout.jpg',  layoutMobile: './assets/mobile/mare-viva-layout-mobile.png',spotify: 'https://ditto.fm/mare_viva' },
+      { id: 'acende',      label: '04  Acende',     type: 'music', layout: './assets/acende-layout.jpg',     layoutMobile: './assets/mobile/acende-layout-mobile.png',   spotify: '#' },
+      { id: 'sopro',       label: '05  Sopro',      type: 'music', layout: './assets/sopro-layout.jpg',      layoutMobile: './assets/mobile/sopro-layout-mobile.png',    spotify: '#' },
+      { id: 'elementar',   label: '06  Elementar',  type: 'music', layout: null,                             layoutMobile: './assets/mobile/elementar-layout-mobile.png',spotify: null },
+      { id: 'guia',        label: '07  Guia',        type: 'music', layout: null,                             layoutMobile: './assets/mobile/guia-layout-mobile.png',     spotify: null },
     ]
 
     // ── Refs ──────────────────────────────
@@ -771,8 +771,12 @@
     })
 
     // ── Menu build ────────────────────────
+    const isMobileView = window.innerWidth < 768
+
     TRACKS.forEach((track) => {
-      const active = track.type === 'text' || track.layout !== null
+      const active = track.type === 'text'
+        || track.layout !== null
+        || (isMobileView && track.layoutMobile !== null)
       const btn = document.createElement('button')
       btn.className = 'menu-item' + (active ? '' : ' soon')
       btn.disabled  = !active
@@ -845,15 +849,18 @@
     function openTrack(track) {
       startAudio()
 
+      const isMob   = window.innerWidth < 768
+      const imgSrc  = (isMob && track.layoutMobile) ? track.layoutMobile : track.layout
+
       musicLayout.classList.remove('fade-in')
       void musicLayout.offsetWidth
-      musicLayout.src = track.layout
+      musicLayout.src = imgSrc
       musicLayout.alt = track.label
       musicLayout.classList.add('fade-in')
 
       // Mobile: fundo cinemático (blur) com a mesma imagem
-      if (window.innerWidth < 768) {
-        musicBg.style.backgroundImage = `url('${track.layout}')`
+      if (isMob) {
+        musicBg.style.backgroundImage = `url('${imgSrc}')`
       }
 
       ctaBtn.href          = track.spotify || '#'
