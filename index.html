@@ -201,7 +201,8 @@
     #music-page { background: #080604; }
     #music-layout {
       width: 100%; height: 100%;
-      object-fit: cover; object-position: center;
+      object-fit: contain; object-position: center;
+      position: relative; z-index: 1;
     }
     #music-layout.fade-in { animation: fadeIn .75s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -417,9 +418,9 @@
     }
     #popup-close:hover { border-color: rgba(255,242,200,.8); color: #fff; }
 
-    /* ── Music BG (cinematic blur — mobile only) ── */
+    /* ── Music BG (cinematic blur) ── */
     #music-bg {
-      display: none;
+      display: block;
       position: absolute; inset: 0;
       background-size: cover;
       background-position: center;
@@ -477,16 +478,6 @@
         right: calc(14px + env(safe-area-inset-right, 0px));
         font-size: 11px; gap: 6px;
         min-height: 44px; padding: 10px 12px;
-      }
-
-      /* ── Music page — imagem completa com fundo cinemático ── */
-      #music-bg { display: block; }
-      #music-layout {
-        object-fit: contain;
-        object-position: center;
-        background: transparent;
-        position: relative;
-        z-index: 1;
       }
 
       /* ── CTA — posição calculada via JS ── */
@@ -673,14 +664,14 @@
     // ══════════════════════════════════════
 
     const TRACKS = [
-      { id: 'o-que-somos', label: 'Origem',        type: 'text',  layout: null,                             layoutMobile: null,                                       spotify: null },
-      { id: 'desperta',    label: '01  Desperta',  type: 'music', layout: './assets/desperta-layout.jpg',   layoutMobile: './assets/mobile/desperta-layout-mobile.jpg', spotify: 'https://ditto.fm/desperta-kae-souza' },
-      { id: 'raiz',        label: '02  Raiz',       type: 'music', layout: './assets/raiz-layout.jpg',       layoutMobile: './assets/mobile/raiz-layout-mobile.jpg',     spotify: 'https://ditto.fm/raiz_b2151e38' },
-      { id: 'mare-viva',   label: '03  Maré Viva', type: 'music', layout: './assets/mare-viva-layout.jpg',  layoutMobile: './assets/mobile/mare-viva-layout-mobile.jpg',spotify: 'https://ditto.fm/mare_viva' },
-      { id: 'acende',      label: '04  Acende',     type: 'music', layout: './assets/acende-layout.jpg',     layoutMobile: './assets/mobile/acende-layout-mobile.jpg',   spotify: '#' },
-      { id: 'sopro',       label: '05  Sopro',      type: 'music', layout: './assets/sopro-layout.jpg',      layoutMobile: './assets/mobile/sopro-layout-mobile.jpg',    spotify: '#' },
-      { id: 'elementar',   label: '06  Elementar',  type: 'music', layout: null,                             layoutMobile: './assets/mobile/elementar-layout-mobile.jpg',spotify: null },
-      { id: 'guia',        label: '07  Guia',        type: 'music', layout: null,                             layoutMobile: './assets/mobile/guia-layout-mobile.jpg',     spotify: null },
+      { id: 'o-que-somos', label: 'Origem',        type: 'text',  layout: null,                                              spotify: null },
+      { id: 'desperta',    label: '01  Desperta',  type: 'music', layout: './assets/mobile/desperta-layout-mobile.jpg',  spotify: 'https://ditto.fm/desperta-kae-souza' },
+      { id: 'raiz',        label: '02  Raiz',       type: 'music', layout: './assets/mobile/raiz-layout-mobile.jpg',       spotify: 'https://ditto.fm/raiz_b2151e38' },
+      { id: 'mare-viva',   label: '03  Maré Viva', type: 'music', layout: './assets/mobile/mare-viva-layout-mobile.jpg',  spotify: 'https://ditto.fm/mare_viva' },
+      { id: 'acende',      label: '04  Acende',     type: 'music', layout: './assets/mobile/acende-layout-mobile.jpg',     spotify: '#' },
+      { id: 'sopro',       label: '05  Sopro',      type: 'music', layout: './assets/mobile/sopro-layout-mobile.jpg',      spotify: '#' },
+      { id: 'elementar',   label: '06  Elementar',  type: 'music', layout: './assets/mobile/elementar-layout-mobile.jpg',  spotify: null },
+      { id: 'guia',        label: '07  Guia',        type: 'music', layout: './assets/mobile/guia-layout-mobile.jpg',       spotify: null },
     ]
 
     // ── Refs ──────────────────────────────
@@ -771,12 +762,8 @@
     })
 
     // ── Menu build ────────────────────────
-    const isMobileView = window.innerWidth < 768
-
     TRACKS.forEach((track) => {
-      const active = track.type === 'text'
-        || track.layout !== null
-        || (isMobileView && track.layoutMobile !== null)
+      const active = track.type === 'text' || track.layout !== null
       const btn = document.createElement('button')
       btn.className = 'menu-item' + (active ? '' : ' soon')
       btn.disabled  = !active
@@ -849,19 +836,13 @@
     function openTrack(track) {
       startAudio()
 
-      const isMob   = window.innerWidth < 768
-      const imgSrc  = (isMob && track.layoutMobile) ? track.layoutMobile : track.layout
-
       musicLayout.classList.remove('fade-in')
       void musicLayout.offsetWidth
-      musicLayout.src = imgSrc
+      musicLayout.src = track.layout
       musicLayout.alt = track.label
       musicLayout.classList.add('fade-in')
 
-      // Mobile: fundo cinemático (blur) com a mesma imagem
-      if (isMob) {
-        musicBg.style.backgroundImage = `url('${imgSrc}')`
-      }
+      musicBg.style.backgroundImage = `url('${track.layout}')`
 
       ctaBtn.href          = track.spotify || '#'
       ctaBtn.style.display = track.spotify && track.spotify !== '#' ? 'block' : 'none'
