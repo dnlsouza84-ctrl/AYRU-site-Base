@@ -882,6 +882,60 @@
       if (e.target === popupOverlay) closePopup()
     })
 
+    // ── Pan touch na home (mobile) ────────
+    if (isTouch) {
+      const homeVideoEl = document.querySelector('#home-bg video')
+      let isPanning = false
+      let panStartX = 0, panStartY = 0
+      let panOriginX = 50, panOriginY = 50
+      let currentPanX = 50, currentPanY = 50
+      let sensX = 0.04, sensY = 0.02
+
+      function calcPanSensitivity() {
+        if (!homeVideoEl.videoWidth) return
+        const vw = window.innerWidth, vh = window.innerHeight
+        const videoAspect  = homeVideoEl.videoWidth / homeVideoEl.videoHeight
+        const screenAspect = vw / vh
+        if (videoAspect > screenAspect) {
+          // vídeo mais largo: excesso horizontal
+          const excess = vh * videoAspect - vw
+          sensX = excess > 2 ? 100 / excess : 0
+          sensY = 0
+        } else {
+          // vídeo mais alto: excesso vertical
+          const excess = vw / videoAspect - vh
+          sensY = excess > 2 ? 100 / excess : 0
+          sensX = 0
+        }
+      }
+
+      homeVideoEl.addEventListener('loadedmetadata', calcPanSensitivity)
+      window.addEventListener('resize', calcPanSensitivity)
+      window.addEventListener('orientationchange', () => setTimeout(calcPanSensitivity, 150))
+
+      homePage.addEventListener('touchstart', (e) => {
+        if (menuOverlay.classList.contains('open')) return
+        if (popupOverlay.classList.contains('open')) return
+        isPanning    = true
+        panStartX    = e.touches[0].clientX
+        panStartY    = e.touches[0].clientY
+        panOriginX   = currentPanX
+        panOriginY   = currentPanY
+      }, { passive: true })
+
+      homePage.addEventListener('touchmove', (e) => {
+        if (!isPanning) return
+        const dx = e.touches[0].clientX - panStartX
+        const dy = e.touches[0].clientY - panStartY
+        currentPanX = Math.max(0, Math.min(100, panOriginX - dx * sensX))
+        currentPanY = Math.max(0, Math.min(100, panOriginY - dy * sensY))
+        homeVideoEl.style.objectPosition = `${currentPanX}% ${currentPanY}%`
+      }, { passive: true })
+
+      homePage.addEventListener('touchend',    () => { isPanning = false })
+      homePage.addEventListener('touchcancel', () => { isPanning = false })
+    }
+
     // ── Eventos ───────────────────────────
     document.getElementById('menu-btn').addEventListener('click', openMenu)
     document.getElementById('menu-close').addEventListener('click', closeMenu)
