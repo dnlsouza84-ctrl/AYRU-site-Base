@@ -733,13 +733,29 @@
 
     function startAudio() {
       if (audioStarted) return
-      audioStarted = true
-      audio.play().catch(() => {})
+      audio.play().then(() => {
+        audioStarted = true
+      }).catch(() => {
+        // bloqueado — próxima interação tentará novamente
+      })
     }
 
-    audio.play().catch(() => {
-      window.addEventListener('pointerdown', startAudio, { once: true })
-    })
+    // Tenta autoplay imediato
+    startAudio()
+
+    // Android/Samsung: desbloqueia no primeiro gesto real do usuário
+    // touchstart é o evento mais confiável no Samsung Internet
+    const _audioUnlockEvents = ['touchstart', 'touchend', 'click', 'pointerdown']
+    function _unlockAudio() {
+      if (audioStarted) {
+        _audioUnlockEvents.forEach(e => document.removeEventListener(e, _unlockAudio))
+        return
+      }
+      startAudio()
+    }
+    _audioUnlockEvents.forEach(e =>
+      document.addEventListener(e, _unlockAudio, { passive: true })
+    )
 
     audioBtn.addEventListener('click', () => {
       if (!audioStarted) startAudio()
